@@ -82,7 +82,6 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         self.showsVerticalScrollIndicator = false
         self.showsHorizontalScrollIndicator = false
         
-
         
         setupImageView()
     }
@@ -108,52 +107,40 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         rightView.addSubview(rightImageView)
         midView.addSubview(midImageView)
         
-        //        初始化 或者 滑动结束 图片1永远放在中间
+        //初始化 或者 滑动结束 图片1永远放在中间
         self.setContentOffset(CGPoint(x: self.frame.width, y: 0), animated: false)
     }
     
-    
-    func addTapGesture(_ imageView:UIImageView){
-        imageView.isUserInteractionEnabled = true
-        let tap  = UITapGestureRecognizer(target: self, action: #selector(tapAction(tap:)))
-        imageView.addGestureRecognizer(tap)
-        
-    }
-    
-    @objc func tapAction(tap:UITapGestureRecognizer){
-        
-        rollingBannerDelegate?.imageDidSelected(index: selectedIndex)
-    }
-    
-    //    原本的ScrollView如下
+    // 滑动过程细节
+    // 原本的ScrollView如下
     // UIView                 |---UIView0---             ---UIView2---|
     // UIImage                |-----图片0----             -----图片2----|
     // UIView                 |             ---UIView1---             |
     // UIImage                |             -----图片1---—             |
     
     
-    //    视差效果，初始化配置如下
-    //UIView0往右放置了100像素 UIView2初始化向右放置了100像素
+    // 视差效果，初始化配置如下
+    // UIView0往右放置了100像素 UIView2初始化向右放置了100像素
     
     // UIView                 |  ---UIView0---       ---UIView2---    |
     // UIImage                |  -----图片0----       -----图片2----    |
     // UIView                 |             ---UIView1---             |
     // UIImage                |             -----图片1---—             |
     
-    //手指向右滑动，UIView0逐渐从左边出现，同时UIView0向左移动100像素回到（0，0）点，图片1也向左移动移动100像素，制造视差效果。
+    // 手指向右滑动，UIView0逐渐从左边出现，同时UIView0向左移动100像素回到（0，0）点，图片1也向左移动移动100像素，制造视差效果。
     
     // UIView                 |---UIView0---         ---UIView2---    |
     // UIImage                |-----图片0----         -----图片2----    |
     // UIView                 |             ---UIView1---             |
     // UIImage                |             图片1---—                  |
     
-    //    总结：UIVIew1 始终不移动，在滑动中通过操纵UIVIew0，UIVIew2和图片1 制造视差效果。
+    // 总结：UIVIew1 始终不移动，在滑动中通过操纵UIVIew0，UIVIew2和图片1 制造视差效果。
     public func scrollViewDidScroll(_ scrollView: UIScrollView){
         
-        print("scrollViewDidScroll")
+        // print("scrollViewDidScroll")
         
         let moveX = scrollView.contentOffset.x - self.bounds.size.width;
-
+        
         //绝对值 等于边长 表示滑动完成了， 改变image数组的位置，重置图片即可。
         if abs(moveX) >= self.bounds.size.width{
             
@@ -180,6 +167,36 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         
     }
     
+    //    计算最终停止的位置
+    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>){
+        //print("scrollViewWillEndDragging")
+        
+        if self.isPagingEnabled {
+            return
+        }
+        
+        var targetX:CGFloat = 0.0
+        
+        if velocity.x == 0 {//用户松手
+            
+            //计算回到哪页： 左边图片出现一半，去第0页。右边视图多于一半出现，去第2页。否则回到中间。
+            let page = Int((scrollView.contentOffset.x+self.bounds.size.width/2)/self.bounds.size.width)
+            targetX = CGFloat(page) * self.bounds.size.width
+        }else{//用户滑动
+            
+            if velocity.x < 0{//右滑 去第0页
+                targetX = 0.0
+            }else{//左滑 去第2页
+                targetX = self.bounds.size.width * CGFloat(2)
+            }
+        }
+
+        let point = CGPoint (x: targetX, y: targetContentOffset.pointee.y)
+        
+        targetContentOffset.pointee = point
+        
+    }
+    
     
     //    往右滑动， 最后的照片 放在第一个位置
     func imagesGoRight(){
@@ -196,6 +213,7 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         imagesArray.add(s1 as Any)
     }
     
+//    计算中间的图片是第几张图片，响应点击事件传递selectedIndex
     func calculateSelectedIndex(_ moveX:CGFloat){
         if moveX < 0 {
             self.selectedIndex -= 1
@@ -213,69 +231,46 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         
     }
     
-    
-    
-    //    计算最终停止的位置
-    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>){
-        
-        print("scrollViewWillEndDragging")
-        
-        if self.isPagingEnabled {
-            return
-        }
-        
-        let targetX = getPostion(scrollView: scrollView, velocity: velocity.x,targetContentOffset:targetContentOffset)
-        
-        let point = CGPoint (x: targetX, y: targetContentOffset.pointee.y)
-        
-        targetContentOffset.pointee = point
+    func addTapGesture(_ imageView:UIImageView){
+        imageView.isUserInteractionEnabled = true
+        let tap  = UITapGestureRecognizer(target: self, action: #selector(tapAction(tap:)))
+        imageView.addGestureRecognizer(tap)
         
     }
     
-    
-    func getPostion(scrollView: UIScrollView, velocity: CGFloat,targetContentOffset: UnsafeMutablePointer<CGPoint>)->CGFloat{
+    @objc func tapAction(tap:UITapGestureRecognizer){
         
-        
-        if velocity == 0 {//用户松手 回到中间
-            print("1")
-            let page = Int((scrollView.contentOffset.x+self.bounds.size.width/2)/self.bounds.size.width)
-            return CGFloat(page)*self.bounds.size.width
-        }else{//用户滑动
-            
-            if velocity < 0{//右滑
-                                print("0")
-                return 0
-            }else{//左滑
-                                print("2")
-                return self.bounds.size.width*CGFloat(2)
-                
-            }
-        }
-        
+        rollingBannerDelegate?.imageDidSelected(index: selectedIndex)
     }
     
     
-     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView){
-//            print("scrollViewWillBeginDragging")
-    }
-    
-    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool){
-//        print("scrollViewDidEndDragging")
-    }
     
     
     public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView){
-//        print("scrollViewWillBeginDecelerating")
+        //        print("scrollViewWillBeginDecelerating")
         self.isUserInteractionEnabled = false
     }
     
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-//        print("scrollViewDidEndDecelerating")
+        //        print("scrollViewDidEndDecelerating")
         self.isUserInteractionEnabled = true
         
     }
     
+    
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView){
+        //            print("scrollViewWillBeginDragging")
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool){
+        //        print("scrollViewDidEndDragging")
+    }
+    
+    
+    
+    
 }
+
 
 
