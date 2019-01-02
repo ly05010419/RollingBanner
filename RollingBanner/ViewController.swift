@@ -24,14 +24,26 @@ class ViewController: UIViewController, RollingBannerDelegate{
     }
     
     
+    @IBAction func autoRollingAction(_ sender: UIButton) {
+        
+        
+        rollingBanner.aotuRolling()
+        
+        if rollingBanner.aotu {
+            sender.setTitle("自动已开启", for: UIControl.State.normal)
+        }else{
+            sender.setTitle("手动已开启", for: UIControl.State.normal)
+        }
+        
+    }
     
     @IBAction func buttonAction(_ sender: UIButton) {
         rollingBanner.isPagingEnabled = !rollingBanner.isPagingEnabled
         
         if rollingBanner.isPagingEnabled {
-            sender.setTitle("自定义效果关闭", for: UIControl.State.normal)
+            sender.setTitle("自定义效果已关闭", for: UIControl.State.normal)
         }else{
-            sender.setTitle("自定义效果开启", for: UIControl.State.normal)
+            sender.setTitle("自定义效果已开启", for: UIControl.State.normal)
         }
     }
     
@@ -42,11 +54,11 @@ class ViewController: UIViewController, RollingBannerDelegate{
         
         if rollingBanner.decelerationRate == .fast {
 
-            sender.setTitle("正常阻力", for: UIControl.State.normal)
+            sender.setTitle("正常阻力已开启", for: UIControl.State.normal)
             
             rollingBanner.decelerationRate = .normal
         }else{
-            sender.setTitle("加大阻力", for: UIControl.State.normal)
+            sender.setTitle("加大阻力已开启", for: UIControl.State.normal)
             
             rollingBanner.decelerationRate = .fast
         }

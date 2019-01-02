@@ -27,6 +27,10 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     private let midImageView = UIImageView()
     private let rightImageView = UIImageView()
     
+    private var time:Timer?
+    
+    public var aotu = false
+    
     var rollingBannerDelegate:RollingBannerDelegate?
     
     private var imagesArray:NSMutableArray!
@@ -192,7 +196,7 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
             
             if velocity.x < 0{//右滑
                 
-                targetX = scrollView.bounds.size.width * CGFloat(page-1)
+                targetX = scrollView.bounds.size.width * CGFloat(page)
             }else{//左滑
                 
                targetX = scrollView.bounds.size.width * CGFloat(page+1)
@@ -252,6 +256,26 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         rollingBannerDelegate?.imageDidSelected(index: selectedIndex)
     }
     
+    
+    public func aotuRolling(){
+        
+        if self.time == nil{
+            
+            self.time = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { (ktimer) in
+                self.setContentOffset(CGPoint(x: self.frame.width*CGFloat(2), y: 0), animated: true)
+            }
+            
+            self.aotu = true
+            
+        }else{
+            self.time?.invalidate()
+            self.time = nil
+            self.aotu = false
+        }
+        
+        
+        
+    }
     
     
     

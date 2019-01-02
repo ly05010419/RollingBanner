@@ -23,19 +23,27 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Sfa-fj-d04">
-                                <rect key="frame" x="134" y="400" width="108" height="30"/>
+                                <rect key="frame" x="126" y="386" width="123" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="自定义效果开启"/>
+                                <state key="normal" title="自定义效果已开启"/>
                                 <connections>
                                     <action selector="buttonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="DeJ-qm-rZM"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fCk-Fx-P5M">
-                                <rect key="frame" x="156" y="485" width="62" height="30"/>
+                                <rect key="frame" x="133" y="440" width="108" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="正常阻力"/>
+                                <state key="normal" title="正常阻力已开启"/>
                                 <connections>
                                     <action selector="decelerationRateAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="roL-g5-t9Y"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i3G-ks-ViW">
+                                <rect key="frame" x="149" y="494" width="77" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="手动已开启"/>
+                                <connections>
+                                    <action selector="autoRollingAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="SNP-Bj-nFv"/>
                                 </connections>
                             </button>
                         </subviews>
