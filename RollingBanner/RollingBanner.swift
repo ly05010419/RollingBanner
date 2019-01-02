@@ -137,8 +137,8 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     // 总结：UIVIew1 始终不移动，在滑动中通过操纵UIVIew0，UIVIew2和图片1 制造视差效果。
     public func scrollViewDidScroll(_ scrollView: UIScrollView){
         
-        // print("scrollViewDidScroll")
-        
+//         print("scrollViewDidScroll")
+
         let moveX = scrollView.contentOffset.x - self.bounds.size.width;
         
         //绝对值 等于边长 表示滑动完成了， 改变image数组的位置，重置图片即可。
@@ -147,16 +147,21 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
             calculateSelectedIndex(moveX)
             
             // 判断滑动方向是左边 还是 右边
+
             if moveX < 0 {
                 imagesGoRight()
             }else{
                 imagesGoLeft()
             }
+            
+          
             //重置图片
             setupImageView();
             
             return;
         }
+        
+       
         
         let targetX = (moveX*CGFloat(1-portion))
         
@@ -169,33 +174,37 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     
     //    计算最终停止的位置
     public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>){
-        //print("scrollViewWillEndDragging")
         
-        if self.isPagingEnabled {
+        if scrollView.isPagingEnabled {
             return
         }
         
         var targetX:CGFloat = 0.0
         
+        var page = Int((scrollView.contentOffset.x+scrollView.bounds.size.width/2)/scrollView.bounds.size.width)
+        
         if velocity.x == 0 {//用户松手
             
-            //计算回到哪页： 左边图片出现一半，去第0页。右边视图多于一半出现，去第2页。否则回到中间。
-            let page = Int((scrollView.contentOffset.x+self.bounds.size.width/2)/self.bounds.size.width)
-            targetX = CGFloat(page) * self.bounds.size.width
+            targetX = CGFloat(page) * scrollView.bounds.size.width
         }else{//用户滑动
             
-            if velocity.x < 0{//右滑 去第0页
-                targetX = 0.0
-            }else{//左滑 去第2页
-                targetX = self.bounds.size.width * CGFloat(2)
+             page = Int((scrollView.contentOffset.x)/scrollView.bounds.size.width)
+            
+            if velocity.x < 0{//右滑
+                
+                targetX = scrollView.bounds.size.width * CGFloat(page-1)
+            }else{//左滑
+                
+               targetX = scrollView.bounds.size.width * CGFloat(page+1)
             }
         }
-
+        
+        
         let point = CGPoint (x: targetX, y: targetContentOffset.pointee.y)
         
         targetContentOffset.pointee = point
-        
     }
+
     
     
     //    往右滑动， 最后的照片 放在第一个位置
@@ -247,13 +256,13 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     
     
     public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView){
-        //        print("scrollViewWillBeginDecelerating")
+//                print("scrollViewWillBeginDecelerating")
         self.isUserInteractionEnabled = false
     }
     
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        //        print("scrollViewDidEndDecelerating")
+//                print("scrollViewDidEndDecelerating")
         self.isUserInteractionEnabled = true
         
     }
