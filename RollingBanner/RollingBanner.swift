@@ -13,8 +13,8 @@ protocol RollingBannerDelegate {
 }
 
 class RollingBanner: UIScrollView ,UIScrollViewDelegate {
-
-//    视差效果p比例调节
+    
+    //    视差效果p比例调节
     private let portion = 0.6
     
     private let leftView = UIView()
@@ -40,7 +40,7 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     }
     
     
-//    初始化三个UIView 放在scrollView上
+    //    初始化三个UIView 放在scrollView上
     func setupViews(){
         
         self.delegate = self
@@ -56,7 +56,7 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         leftView.backgroundColor = UIColor.clear
         self.addSubview(leftView)
         
-      
+        
         
         rightView.frame = CGRect(x: CGFloat(1+portion)*scrollWidth, y: 0, width: scrollWidth, height: scrollHeight)
         rightView.clipsToBounds = true
@@ -70,25 +70,24 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         midView.backgroundColor = UIColor.clear
         self.addSubview(midView)
         
-//        透视查看原理
-//        leftView.backgroundColor = UIColor.red
-//        rightView.backgroundColor = UIColor.yellow
-//        midView.backgroundColor = UIColor.blue
-//        leftView.alpha = 0.5
-//        rightView.alpha = 0.5
-//        midView.alpha = 0.5
+        //        透视查看原理
+        //        leftView.backgroundColor = UIColor.red
+        //        rightView.backgroundColor = UIColor.yellow
+        //        midView.backgroundColor = UIColor.blue
+        //        leftView.alpha = 0.5
+        //        rightView.alpha = 0.5
+        //        midView.alpha = 0.5
         
-
+        
         self.showsVerticalScrollIndicator = false
         self.showsHorizontalScrollIndicator = false
         
-//        加大阻力 最多滑动一屏
-        self.decelerationRate = .fast
+
         
         setupImageView()
     }
     
-//    UIView上添加ImageView 按顺序 0 1 2
+    //    UIView上添加ImageView 按顺序 0 1 2
     func setupImageView(){
         
         self.leftImageView.frame = leftView.bounds
@@ -109,7 +108,7 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         rightView.addSubview(rightImageView)
         midView.addSubview(midImageView)
         
-//        初始化 或者 滑动结束 图片1永远放在中间
+        //        初始化 或者 滑动结束 图片1永远放在中间
         self.setContentOffset(CGPoint(x: self.frame.width, y: 0), animated: false)
     }
     
@@ -126,14 +125,14 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         rollingBannerDelegate?.imageDidSelected(index: selectedIndex)
     }
     
-//    原本的ScrollView如下
+    //    原本的ScrollView如下
     // UIView                 |---UIView0---             ---UIView2---|
     // UIImage                |-----图片0----             -----图片2----|
     // UIView                 |             ---UIView1---             |
     // UIImage                |             -----图片1---—             |
     
     
-//    视差效果，初始化配置如下
+    //    视差效果，初始化配置如下
     //UIView0往右放置了100像素 UIView2初始化向右放置了100像素
     
     // UIView                 |  ---UIView0---       ---UIView2---    |
@@ -148,13 +147,13 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     // UIView                 |             ---UIView1---             |
     // UIImage                |             图片1---—                  |
     
-//    总结：UIVIew1 始终不移动，在滑动中通过操纵UIVIew0，UIVIew2和图片1 制造视差效果。
+    //    总结：UIVIew1 始终不移动，在滑动中通过操纵UIVIew0，UIVIew2和图片1 制造视差效果。
     public func scrollViewDidScroll(_ scrollView: UIScrollView){
         
-      
+        print("scrollViewDidScroll")
+        
         let moveX = scrollView.contentOffset.x - self.bounds.size.width;
-        
-        
+
         //绝对值 等于边长 表示滑动完成了， 改变image数组的位置，重置图片即可。
         if abs(moveX) >= self.bounds.size.width{
             
@@ -178,18 +177,18 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
         
         leftView.frame.origin.x =  self.bounds.size.width*CGFloat(1-portion) + targetX
         rightView.frame.origin.x =  self.bounds.size.width*CGFloat(1+portion) + targetX
-
+        
     }
     
     
-//    往右滑动， 最后的照片 放在第一个位置
+    //    往右滑动， 最后的照片 放在第一个位置
     func imagesGoRight(){
         let s1 = imagesArray.lastObject
         imagesArray.removeObject(at: imagesArray.count-1)
         
         imagesArray.insert(s1 as Any, at: 0)
     }
-//    往左滑动 第一个照片 放在最后一个位置
+    //    往左滑动 第一个照片 放在最后一个位置
     func imagesGoLeft(){
         let s1 = imagesArray.firstObject
         imagesArray.removeObject(at: 0)
@@ -216,42 +215,67 @@ class RollingBanner: UIScrollView ,UIScrollViewDelegate {
     
     
     
-//    计算最终停止的位置
+    //    计算最终停止的位置
     public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>){
-
+        
+        print("scrollViewWillEndDragging")
+        
+        if self.isPagingEnabled {
+            return
+        }
+        
         let targetX = getPostion(scrollView: scrollView, velocity: velocity.x,targetContentOffset:targetContentOffset)
         
         let point = CGPoint (x: targetX, y: targetContentOffset.pointee.y)
         
         targetContentOffset.pointee = point
+        
     }
     
     
     func getPostion(scrollView: UIScrollView, velocity: CGFloat,targetContentOffset: UnsafeMutablePointer<CGPoint>)->CGFloat{
         
-        //计算现在在第几页 比如第二页
-        let page = Int((scrollView.contentOffset.x+self.bounds.size.width/2)/self.bounds.size.width)
-
-
-        if abs(velocity) > 0 {//用户滑动
+        
+        if velocity == 0 {//用户松手 回到中间
+            print("1")
+            let page = Int((scrollView.contentOffset.x+self.bounds.size.width/2)/self.bounds.size.width)
+            return CGFloat(page)*self.bounds.size.width
+        }else{//用户滑动
             
-
-            if scrollView.contentOffset.x < (self.bounds.size.width * CGFloat(page) - self.bounds.size.width*0.1){ //只要左边露个头 就去左边
-
-                return CGFloat(page-1)*self.bounds.size.width
-            }else if (scrollView.contentOffset.x > (self.bounds.size.width * CGFloat(page) + self.bounds.size.width*0.1)) {//只要右边露个头 就去右边
-
-                return CGFloat(page+1)*self.bounds.size.width
-            }else{//回到中间
-
-                return CGFloat(page)*self.bounds.size.width
+            if velocity < 0{//右滑
+                                print("0")
+                return 0
+            }else{//左滑
+                                print("2")
+                return self.bounds.size.width*CGFloat(2)
+                
             }
-            
-        }else{//用户松手 回到中间
-            
-           return CGFloat(page)*self.bounds.size.width
         }
         
     }
     
+    
+     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView){
+//            print("scrollViewWillBeginDragging")
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool){
+//        print("scrollViewDidEndDragging")
+    }
+    
+    
+    public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView){
+//        print("scrollViewWillBeginDecelerating")
+        self.isUserInteractionEnabled = false
+    }
+    
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+//        print("scrollViewDidEndDecelerating")
+        self.isUserInteractionEnabled = true
+        
+    }
+    
 }
+
+
